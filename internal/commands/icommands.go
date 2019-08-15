@@ -1,7 +1,7 @@
 package commands
 
 type ICommand interface {
-	Decode() error
-	Exec() error
+	Decode() *Error
+	Exec() (*Response, *Error)
 	Command() string
 }

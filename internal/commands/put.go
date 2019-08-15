@@ -1,6 +1,14 @@
 package commands
 
-import "io"
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"strconv"
+
+	"github.com/gokultp/hashqd/internal/queue"
+)
 
 type Put struct {
 	data   []byte
@@ -13,12 +21,42 @@ func NewPut(reader io.Reader) *Put {
 	}
 }
 
-func (c *Put) Decode() error {
-	return nil
+func (c *Put) Decode() *Error {
+	var bufSize int
+	var err error
+	scanner := bufio.NewScanner(c.reader)
+	scanner.Split(bufio.ScanLines)
+
+	if scanner.Scan() {
+		strSize := scanner.Text()
+		bufSize, err = strconv.Atoi(strSize)
+		if err != nil {
+			log.Printf("error on atoi in put.decode %v", err)
+			return errUnknown(" on reading request")
+		}
+	}
+	if scanner.Scan() {
+		data := scanner.Bytes()
+		if len(data) != bufSize {
+			return errBadRequest("invalid content length")
+		}
+		c.data = data
+		return nil
+	}
+	if scanner.Err() != nil {
+		log.Printf("put.decode scanner error %v", scanner.Err())
+		return errUnknown(" on reading request")
+
+	}
+	return errUnknown(" on reading request")
 }
 
-func (c *Put) Exec() error {
-	return nil
+func (c *Put) Exec() (*Response, *Error) {
+	id, err := queue.Enqueue(c.data)
+	if err != nil {
+		return nil, errPut(err.Error())
+	}
+	return NewResponse(fmt.Sprintf("%d\n", id)), nil
 }
 
 func (c *Put) Command() string {

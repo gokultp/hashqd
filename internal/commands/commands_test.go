@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -42,6 +43,32 @@ func TestGetCommand(t *testing.T) {
 			}
 			if err == nil && !reflect.DeepEqual(got.Command(), tt.want) {
 				t.Errorf("GetCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_readCommand(t *testing.T) {
+	type args struct {
+		r io.Reader
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{name: "should return the command", args: args{r: strings.NewReader("put 4\r\ntest")}, want: "put", wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := readCommand(tt.args.r)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("readCommand() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("readCommand() = %v, want %v", got, tt.want)
 			}
 		})
 	}
