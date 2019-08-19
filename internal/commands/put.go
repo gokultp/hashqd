@@ -55,7 +55,7 @@ func (c *Put) Decode() *Error {
 }
 
 func (c *Put) Exec() (*Response, *Error) {
-	id, err := queue.Enqueue(c.data)
+	id, err := queue.Enqueue(c.session.Tube, c.data)
 	if err != nil {
 		return nil, errPut(err.Error())
 	}

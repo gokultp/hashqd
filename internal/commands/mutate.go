@@ -63,7 +63,7 @@ func (c *Mutate) Decode() *Error {
 }
 
 func (c *Mutate) Exec() (*Response, *Error) {
-	err := queue.Update(c.id, c.data)
+	err := queue.Update(c.session.Tube, c.id, c.data)
 	if err != nil {
 		log.Printf("error on mutation %v", err)
 		return nil, errMutate(err.Error())

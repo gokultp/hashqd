@@ -25,7 +25,7 @@ func (c *Reserve) Decode() *Error {
 
 func (c *Reserve) Exec() (*Response, *Error) {
 	dataChan := make(chan []byte)
-	go queue.Dequeue(dataChan)
+	go queue.Dequeue(c.session.Tube, dataChan)
 	res := NewResponse()
 	for {
 		select {
