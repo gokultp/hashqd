@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/gokultp/hashqd/internal/commands"
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 func Listen(port string) error {
@@ -24,9 +25,10 @@ func Listen(port string) error {
 }
 
 func hanldeConn(c net.Conn) {
+	s := session.NewSession()
 	for {
 		reader := bufio.NewReader(c)
-		cmd, err := commands.GetCommand(reader)
+		cmd, err := commands.GetCommand(s, reader)
 		if err != nil {
 			log.Print(err)
 			return
