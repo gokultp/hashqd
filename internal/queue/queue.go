@@ -11,6 +11,7 @@ type Queue struct {
 	front int
 	back  int
 	lock  sync.Mutex
+	dlock sync.Mutex
 }
 
 func NewQueue() *Queue {
@@ -32,6 +33,7 @@ func (q *Queue) Enqueue(data []byte) (int, error) {
 }
 
 func (q *Queue) Dequeue(data chan []byte) {
+	q.dlock.Lock()
 	for q.front < q.back {
 	}
 	q.lock.Lock()
@@ -39,6 +41,7 @@ func (q *Queue) Dequeue(data chan []byte) {
 	delete(q.data, q.back)
 	q.back++
 	q.lock.Unlock()
+	q.dlock.Unlock()
 	data <- d
 	return
 }

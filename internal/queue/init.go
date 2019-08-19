@@ -1,27 +1,43 @@
 package queue
 
-import "fmt"
+const (
+	TubeDefault = "default"
+)
 
 var (
-	q *Queue
+	qMap map[string]*Queue
 )
 
 func Init() {
-	q = NewQueue()
+	qMap = map[string]*Queue{
+		TubeDefault: NewQueue(),
+	}
 }
 
-func Enqueue(data []byte) (int, error) {
-	return q.Enqueue(data)
+func Enqueue(tube string, data []byte) (int, error) {
+	if _, found := qMap[tube]; !found {
+		qMap[tube] = NewQueue()
+	}
+	return qMap[tube].Enqueue(data)
 }
 
-func Dequeue(data chan []byte) {
-	q.Dequeue(data)
+func Dequeue(tube string, data chan []byte) {
+	if _, found := qMap[tube]; !found {
+		qMap[tube] = NewQueue()
+	}
+	qMap[tube].Dequeue(data)
 }
 
-func Update(id int, data []byte) error {
-	return q.Update(id, data)
+func Update(tube string, id int, data []byte) error {
+	if _, found := qMap[tube]; !found {
+		qMap[tube] = NewQueue()
+	}
+	return qMap[tube].Update(id, data)
 }
 
-func Log() {
-	fmt.Println(q.data, q.front, q.back)
+func Disconnect(tube string) {
+	// if no one is reserved the tube and if is empty
+	if q, found := qMap[tube]; found && q.front < q.back {
+		delete(qMap, tube)
+	}
 }
