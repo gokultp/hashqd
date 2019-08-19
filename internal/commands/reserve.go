@@ -4,15 +4,18 @@ import (
 	"io"
 
 	"github.com/gokultp/hashqd/internal/queue"
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 type Reserve struct {
-	reader io.Reader
+	reader  io.Reader
+	session *session.Session
 }
 
-func NewReserve(reader io.Reader) *Reserve {
+func NewReserve(s *session.Session, r io.Reader) *Reserve {
 	return &Reserve{
-		reader: reader,
+		reader:  r,
+		session: s,
 	}
 }
 

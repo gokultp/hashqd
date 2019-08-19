@@ -2,15 +2,19 @@ package commands
 
 import (
 	"io"
+
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 type Ping struct {
-	reader io.Reader
+	reader  io.Reader
+	session *session.Session
 }
 
-func NewPing(reader io.Reader) *Ping {
+func NewPing(s *session.Session, r io.Reader) *Ping {
 	return &Ping{
-		reader: reader,
+		reader:  r,
+		session: s,
 	}
 }
 

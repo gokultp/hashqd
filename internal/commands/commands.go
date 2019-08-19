@@ -3,6 +3,8 @@ package commands
 import (
 	"errors"
 	"io"
+
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 const (
@@ -13,22 +15,22 @@ const (
 	CommandMutate  = "mutate"
 )
 
-func GetCommand(r io.Reader) (ICommand, error) {
+func GetCommand(s *session.Session, r io.Reader) (ICommand, error) {
 	commandName, err := readCommand(r)
 	if err != nil {
 		return nil, err
 	}
 	switch commandName {
 	case CommandPut:
-		return NewPut(r), nil
+		return NewPut(s, r), nil
 	case CommandPing:
-		return NewPing(r), nil
+		return NewPing(s, r), nil
 	case CommandFin:
-		return NewFin(r), nil
+		return NewFin(s, r), nil
 	case CommandReserve:
-		return NewReserve(r), nil
+		return NewReserve(s, r), nil
 	case CommandMutate:
-		return NewMutate(r), nil
+		return NewMutate(s, r), nil
 	}
 	return nil, errors.New("invalid command, valid commands are <put, ping, fin, reserve...>")
 }

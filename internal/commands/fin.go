@@ -2,15 +2,19 @@ package commands
 
 import (
 	"io"
+
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 type Fin struct {
-	reader io.Reader
+	reader  io.Reader
+	session *session.Session
 }
 
-func NewFin(reader io.Reader) *Fin {
+func NewFin(s *session.Session, r io.Reader) *Fin {
 	return &Fin{
-		reader: reader,
+		reader:  r,
+		session: s,
 	}
 }
 

@@ -9,17 +9,20 @@ import (
 	"strings"
 
 	"github.com/gokultp/hashqd/internal/queue"
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 type Mutate struct {
-	data   []byte
-	id     int
-	reader io.Reader
+	data    []byte
+	id      int
+	reader  io.Reader
+	session *session.Session
 }
 
-func NewMutate(reader io.Reader) *Mutate {
+func NewMutate(s *session.Session, r io.Reader) *Mutate {
 	return &Mutate{
-		reader: reader,
+		reader:  r,
+		session: s,
 	}
 }
 
@@ -35,12 +38,12 @@ func (c *Mutate) Decode() *Error {
 		c.id, err = strconv.Atoi(meta[0])
 		if err != nil {
 			log.Printf("error on atoi in Mutate.decode %v", err)
-			return errUnknown(" on reading request")
+			return errMutate("id should be a string")
 		}
 		bufSize, err = strconv.Atoi(meta[1])
 		if err != nil {
 			log.Printf("error on atoi in Mutate.decode %v", err)
-			return errUnknown(" on reading request")
+			return errMutate("invalid content length")
 		}
 	}
 	if scanner.Scan() {
@@ -53,15 +56,16 @@ func (c *Mutate) Decode() *Error {
 	}
 	if scanner.Err() != nil {
 		log.Printf("Mutate.decode scanner error %v", scanner.Err())
-		return errUnknown(" on reading request")
+		return errBadRequest("bad content")
 
 	}
-	return errUnknown(" on reading request")
+	return errUnknown("reading request")
 }
 
 func (c *Mutate) Exec() (*Response, *Error) {
 	err := queue.Update(c.id, c.data)
 	if err != nil {
+		log.Printf("error on mutation %v", err)
 		return nil, errMutate(err.Error())
 	}
 	return NewResponse(fmt.Sprintf("%d\n", c.id)), nil

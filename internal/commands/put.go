@@ -8,16 +8,19 @@ import (
 	"strconv"
 
 	"github.com/gokultp/hashqd/internal/queue"
+	"github.com/gokultp/hashqd/internal/session"
 )
 
 type Put struct {
-	data   []byte
-	reader io.Reader
+	session *session.Session
+	data    []byte
+	reader  io.Reader
 }
 
-func NewPut(reader io.Reader) *Put {
+func NewPut(s *session.Session, r io.Reader) *Put {
 	return &Put{
-		reader: reader,
+		session: s,
+		reader:  r,
 	}
 }
 
