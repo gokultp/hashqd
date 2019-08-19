@@ -1,11 +1,11 @@
 package queue
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 )
 
+// Queue is a simple in-memory queue implementation
 type Queue struct {
 	data  map[int][]byte
 	front int
@@ -14,6 +14,7 @@ type Queue struct {
 	dlock sync.Mutex
 }
 
+// NewQueue will return a new instance of Queue
 func NewQueue() *Queue {
 	return &Queue{
 		data:  map[int][]byte{},
@@ -22,6 +23,7 @@ func NewQueue() *Queue {
 	}
 }
 
+// Enqueue inserts data to queue
 func (q *Queue) Enqueue(data []byte) (int, error) {
 	q.lock.Lock()
 	q.data[q.front+1] = data
@@ -32,6 +34,7 @@ func (q *Queue) Enqueue(data []byte) (int, error) {
 
 }
 
+// Dequeue dequeues data
 func (q *Queue) Dequeue(data chan []byte) {
 	q.dlock.Lock()
 	for q.front < q.back {
@@ -46,12 +49,18 @@ func (q *Queue) Dequeue(data chan []byte) {
 	return
 }
 
+// Update will update an already enqueued job
 func (q *Queue) Update(id int, data []byte) error {
 	if _, ok := q.data[id]; !ok {
-		return errors.New(fmt.Sprintf("could not find any job with id : %d", id))
+		return fmt.Errorf("could not find any job with id : %d", id)
 	}
 	q.lock.Lock()
 	q.data[id] = data
 	q.lock.Unlock()
 	return nil
+}
+
+// Count will return number of active items in the queue
+func (q *Queue) Count() int {
+	return q.front - q.back + 1
 }
