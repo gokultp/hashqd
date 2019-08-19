@@ -13,6 +13,7 @@ const (
 	CommandFin     = "fin"
 	CommandReserve = "reserve"
 	CommandMutate  = "mutate"
+	CommandWatch   = "watch"
 )
 
 func GetCommand(s *session.Session, r io.Reader) (ICommand, error) {
@@ -31,6 +32,8 @@ func GetCommand(s *session.Session, r io.Reader) (ICommand, error) {
 		return NewReserve(s, r), nil
 	case CommandMutate:
 		return NewMutate(s, r), nil
+	case CommandWatch:
+		return NewWatch(s, r), nil
 	}
 	return nil, errors.New("invalid command, valid commands are <put, ping, fin, reserve...>")
 }
