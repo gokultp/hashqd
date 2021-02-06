@@ -3,23 +3,32 @@ package queue
 import (
 	"fmt"
 	"sync"
+	"time"
+
+	"github.com/gokultp/hashqd/internal/storage"
+	"github.com/gokultp/hashqd/internal/window"
 )
 
 // Queue is a simple in-memory queue implementation
 type Queue struct {
-	data  map[int][]byte
-	front int
-	back  int
-	lock  sync.Mutex
-	dlock sync.Mutex
+	data     map[int][]byte
+	front    int
+	back     int
+	lock     sync.Mutex
+	dlock    sync.Mutex
+	storageW *window.Window
 }
 
 // NewQueue will return a new instance of Queue
 func NewQueue() *Queue {
+	storageListener := storage.NewListener()
+	w := window.New(storageListener, 1, time.Microsecond)
+	go w.Exec()
 	return &Queue{
-		data:  map[int][]byte{},
-		front: -1,
-		back:  0,
+		data:     map[int][]byte{},
+		front:    -1,
+		back:     0,
+		storageW: window.New(storageListener, 64, 500*time.Nanosecond),
 	}
 }
 
@@ -30,6 +39,9 @@ func (q *Queue) Enqueue(data []byte) (int, error) {
 	f := q.front + 1
 	q.front = f
 	q.lock.Unlock()
+	go func() {
+		q.storageW.C <- data
+	}()
 	return q.front, nil
 
 }
