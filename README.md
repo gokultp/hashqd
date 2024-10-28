@@ -2,6 +2,7 @@
 ![](./assets/logo.png)
 
  A distributed hashed message broker
+ Incomplete !!
 
 ## Install
 
